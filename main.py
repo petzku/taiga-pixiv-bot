@@ -49,6 +49,9 @@ async def send_embeds(message: discord.Message):
         else:
             continue
         should_spoiler = is_spoilered(message.content, match.start(), match.end())
+
+        await message.add_reaction("🕓")
+
         for i in range(math.ceil(len(urls) / 10)):
             # limit is 10 attachments per message
             files: List[discord.File] = []
@@ -61,6 +64,12 @@ async def send_embeds(message: discord.Message):
                     )
                 )
             await message.reply(files=files, mention_author=False)
+    try:
+        await message.edit(suppress=True)
+    except discord.errors.Forbidden:
+        pass
+    if client.user:  # to make mypy happy -- we will always be logged in here
+        await message.remove_reaction("🕓", (client.user))
 
 
 def has_pixiv_link(message: discord.Message):

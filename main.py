@@ -8,6 +8,7 @@ import math
 from os import path
 
 import pixivpy3
+import pixiv_auth
 
 # config, contains secrets
 import config
@@ -41,7 +42,7 @@ def is_spoilered(content: str, linkstart: int, linkend: int):
 async def send_embeds(message: discord.Message):
     for match in pixiv_re.finditer(message.content):
         pid = match.group("new_id") or match.group("old_id")
-        details = api.illust_detail(int(pid)).illust
+        details = api_auth_wrapper(api.illust_detail, int(pid)).illust
         if details.meta_single_page:
             urls = [details.image_urls.large]
         elif pages := details.meta_pages:
@@ -108,6 +109,40 @@ async def on_message(message: discord.Message):
         await send_embeds(message)
 
 
+# auth stuff
+
+
+def read_auth_from_file():
+    with open(config.AUTHFILE, "r") as fo:
+        access = fo.readline().strip().split()[-1]
+        refresh = fo.readline().strip().split()[-1]
+    return access, refresh
+
+
+def authenticate_api():
+    access, _ = read_auth_from_file()
+    api.set_auth(access)
+
+
+def refresh_auth():
+    _, refresh = read_auth_from_file()
+    access, _ = pixiv_auth.refresh(refresh)
+    api.set_auth(access)
+
+
+def api_auth_wrapper(func, *args, **kwargs):
+    res = func(*args, **kwargs)
+    if not res.error:
+        return res
+    print("error, refreshing...")
+    # if error: refresh auth, then try again
+    try:
+        refresh_auth()
+    except pixiv_auth.RefreshError:
+        print("Error refreshing auth token!", file=stderr)
+    return func(*args, **kwargs)
+
+
 if __name__ == "__main__":
-    api.set_auth(config.PIXIV_TOKEN)
+    authenticate_api()
     client.run(config.TOKEN)

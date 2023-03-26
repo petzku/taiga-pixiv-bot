@@ -4,5 +4,7 @@ __pycache__/
 venv/
 tmp/
 
+.auth
+
 # contains secrets, do not include in repo
 config.py

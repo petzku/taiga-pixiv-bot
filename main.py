@@ -5,7 +5,8 @@ from typing import List
 import discord
 import re
 import math
-from os import path
+from os import path, makedirs
+from sys import stderr
 
 import pixivpy3
 import pixiv_auth
@@ -53,6 +54,9 @@ async def send_embeds(message: discord.Message):
 
         await message.add_reaction("🕓")
 
+        # before downloading, ensure temp directory exists
+        if not path.exists(config.TEMPDIR):
+            makedirs(config.TEMPDIR)
         for i in range(math.ceil(len(urls) / 10)):
             # limit is 10 attachments per message
             files: List[discord.File] = []

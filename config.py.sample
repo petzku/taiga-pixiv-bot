@@ -7,3 +7,13 @@ DISCORD_TOKEN = ""
 
 # Pixiv auth token
 PIXIV_TOKEN = ""
+
+# Directory to download images into
+TEMPDIR = "/tmp"
+
+# Server/channel whitelist - Discord "snowflake" IDs
+# If left empty, these are ignored
+SERVERS: list[int] = [
+]
+CHANNELS: list[int] = [
+]

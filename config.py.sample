@@ -13,7 +13,4 @@ TEMPDIR = "/tmp"
 
 # Server/channel whitelist - Discord "snowflake" IDs
 # If left empty, these are ignored
-SERVERS: list[int] = [
-]
-CHANNELS: list[int] = [
-]
+ALLOWLIST: dict[int, list[int]] = {}

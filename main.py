@@ -81,11 +81,16 @@ def has_spoiler(message: discord.Message):
 
 
 def is_accepted_channel(message: discord.Message):
-    if config.CHANNELS:
-        return message.channel.id in config.CHANNELS
-    if config.SERVERS:
-        return message.guild.id in config.SERVERS
-    # if neither whitelist exists, accept all
+    # if guild is not defined, we're in a DM
+    if message.guild and config.ALLOWLIST:
+        if message.guild.id not in config.ALLOWLIST:
+            return False
+        if not (channellist := config.ALLOWLIST[message.guild.id]):
+            # list is empty => allow any channel
+            return True
+        # otherwise, check that the current channel is on the accept list
+        return message.channel.id in channellist
+    # if allowlist is empty, or in DM, accept everything
     return True
 
 

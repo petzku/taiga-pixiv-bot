@@ -13,7 +13,7 @@ import pixivpy3
 import config
 
 pixiv_re = re.compile(
-    r"https?:\/\/(?:www\.)?pixiv\.net\/(?:.*artworks\/(?P<new_id>\d+)|member_illust\.php\?.*illust_id=(?P<old_id>\d+))\/?",  # noqa: 501
+    r"https?:\/\/(?:www\.)?pixiv\.net\/(?:.*artworks\/(?P<new_id>\d+)|member_illust\.php\?.*illust_id=(?P<old_id>\d+))\/?",
     re.IGNORECASE,
 )
 spoiler_re = re.compile(r"(?<!\\)\|\|")

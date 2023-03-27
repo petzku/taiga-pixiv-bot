@@ -59,6 +59,20 @@ def print_auth_token_response(response):
     print("expires_in:", data.get("expires_in", 0))
 
 
+def save_auth_token_response(response):
+    data = response.json()
+    access_token = data["access_token"]
+    refresh_token = data["refresh_token"]
+    with open(AUTHFILE, "w") as fo:
+        fo.writelines(
+            [
+                f"access_token: {access_token}\n",
+                f"refresh_token: {refresh_token}\n",
+                f"expires_in: {data.get('expires_in', 0)}\n",
+            ]
+        )
+
+
 def login():
     code_verifier, code_challenge = oauth_pkce(s256)
     login_params = {
@@ -89,6 +103,7 @@ def login():
     )
 
     print_auth_token_response(response)
+    save_auth_token_response(response)
 
 
 def _refresh(refresh_token):
@@ -111,16 +126,7 @@ def refresh(refresh_token):
     try:
         access_token = data["access_token"]
         refresh_token = data["refresh_token"]
-
-        with open(AUTHFILE, "w") as fo:
-            fo.writelines(
-                [
-                    f"access_token: {access_token}\n",
-                    f"refresh_token: {refresh_token}\n",
-                    f"expires_in: {data.get('expires_in', 0)}\n",
-                ]
-            )
-
+        save_auth_token_response(response)
         return access_token, refresh_token
     except KeyError:
         raise RefreshError

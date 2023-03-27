@@ -6,6 +6,9 @@ Designed to just complement [Saucybot](https://github.com/Sn0wCrack/saucybot-dis
 
 ## Setup
 
+**THIS PROGRAM REQUIRES PYTHON 3.10 OR GREATER.**
+Some systems' default python version is lower than this. At the time of writing, 3.11 is the latest stable release, but many distros still ship 3.10 or lower. Make sure you're using a sufficiently new Python. You may need to specify `python3` or `python3.10` to use the appropriate version.
+
 1. (Optional, recommended) Create a virtualenv and activate it
 2. Copy `config.py.sample` to `config.py` and configure appropriately
 3. Install the packages from `requirements.txt`

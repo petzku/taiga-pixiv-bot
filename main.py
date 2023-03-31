@@ -34,7 +34,11 @@ async def on_ready():
 
 
 def is_spoilered(content: str, linkstart: int, linkend: int):
-    """figure out if the link is spoilered"""
+    """figure out if the link is spoilered
+
+    Scans the start of the string to identify if there is an unclosed spoiler,
+    i.e. an uneven number of `||` pairs, and the end to identify if there is a closing one at all.
+    """
     before = len(spoiler_re.findall(content, endpos=linkstart))
     after = len(spoiler_re.findall(content, pos=linkend))
     return before % 2 == 1 and after > 0
@@ -52,6 +56,7 @@ async def send_embeds(message: discord.Message):
             continue
         should_spoiler = is_spoilered(message.content, match.start(), match.end())
 
+        # add reaction to indicate to user "work in progress"; removed after done
         await message.add_reaction("🕓")
 
         # before downloading, ensure temp directory exists
@@ -69,6 +74,7 @@ async def send_embeds(message: discord.Message):
                     )
                 )
             await message.reply(files=files, mention_author=False)
+    # remove embeds from invoking message
     try:
         await message.edit(suppress=True)
     except discord.errors.Forbidden:

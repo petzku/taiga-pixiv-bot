@@ -40,8 +40,8 @@ def is_spoilered(content: str, linkstart: int, linkend: int):
     i.e. an uneven number of `||` pairs, and the end to identify if there is a closing one at all.
     """
     before = len(spoiler_re.findall(content, endpos=linkstart))
-    after = len(spoiler_re.findall(content, pos=linkend))
-    return before % 2 == 1 and after > 0
+    after = spoiler_re.search(content, pos=linkend)
+    return before % 2 == 1 and after is not None
 
 
 async def send_embeds(message: discord.Message):

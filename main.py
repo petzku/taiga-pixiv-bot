@@ -49,9 +49,9 @@ async def send_embeds(message: discord.Message):
         pid = match.group("new_id") or match.group("old_id")
         details = api_auth_wrapper(api.illust_detail, int(pid)).illust
         if details.meta_single_page:
-            urls = [details.image_urls.large]
+            urls = [details.meta_single_page.original_image_url]
         elif pages := details.meta_pages:
-            urls = [page.image_urls.large for page in pages]
+            urls = [page.image_urls.original for page in pages]
         else:
             continue
         should_spoiler = is_spoilered(message.content, match.start(), match.end())

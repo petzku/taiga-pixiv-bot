@@ -9,6 +9,7 @@ from os import path, makedirs
 from sys import stderr
 
 import pixivpy3
+import requests
 import pixiv_auth
 
 # config, contains secrets
@@ -33,6 +34,22 @@ async def on_ready():
     print("Logged on as", client.user)
 
 
+def pixiv_req(method, url, **kwargs):
+    headers = {"Referer": "https://app-api.pixiv.net/"}
+    return requests.request(method, url=url, headers=headers, **kwargs)
+
+
+def is_over_8mb(url):
+    return int(pixiv_req("HEAD", url).headers["Content-Length"]) >= 8388284
+
+
+def select_reasonable_url(original_url, large_url):
+    if is_over_8mb(original_url):
+        # the "large" URL from the API is actually a 600px one, not 1200px
+        return large_url.replace("c/600x1200_90/", "")
+    return original_url
+
+
 def is_spoilered(content: str, linkstart: int, linkend: int):
     """figure out if the link is spoilered
 
@@ -49,9 +66,17 @@ async def send_embeds(message: discord.Message):
         pid = match.group("new_id") or match.group("old_id")
         details = api_auth_wrapper(api.illust_detail, int(pid)).illust
         if details.meta_single_page:
-            urls = [details.meta_single_page.original_image_url]
+            urls = [
+                select_reasonable_url(
+                    details.meta_single_page.original_image_url,
+                    details.image_urls.large,
+                )
+            ]
         elif pages := details.meta_pages:
-            urls = [page.image_urls.original for page in pages]
+            urls = [
+                select_reasonable_url(page.image_urls.original, page.image_urls.large)
+                for page in pages
+            ]
         else:
             continue
         should_spoiler = is_spoilered(message.content, match.start(), match.end())

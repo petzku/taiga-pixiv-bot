@@ -116,6 +116,16 @@ def has_spoiler(message: discord.Message):
     return bool(spoiler_re.search(message.content))
 
 
+def allow_unspoiler(message: discord.Message):
+    # on some servers, we want to allow replies to anything instead of only spoilered messages.
+    # allow management either on server or channel basis.
+    if message.channel.id in config.ONLY_SPOILER:
+        return not config.ONLY_SPOILER[message.channel.id]
+    if message.guild and message.guild.id in config.ONLY_SPOILER:
+        return not config.ONLY_SPOILER[message.guild.id]
+    return True
+
+
 def is_accepted_channel(message: discord.Message):
     # if guild is not defined, we're in a DM
     if message.guild and config.ALLOWLIST:
@@ -139,7 +149,7 @@ async def on_message(message: discord.Message):
     if (
         is_accepted_channel(message)
         and has_pixiv_link(message)
-        and has_spoiler(message)
+        and (allow_unspoiler(message) or has_spoiler(message))
     ):
         await send_embeds(message)
 

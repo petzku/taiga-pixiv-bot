@@ -16,7 +16,7 @@ import pixiv_auth
 import config
 
 pixiv_re = re.compile(
-    r"https?:\/\/(?:www\.)?pixiv\.net\/(?:.*artworks\/(?P<new_id>\d+)|member_illust\.php\?.*illust_id=(?P<old_id>\d+))\/?",
+    r"(?<!<)https?:\/\/(?:www\.)?pixiv\.net\/(?:.*artworks\/(?P<new_id>\d+)|member_illust\.php\?.*illust_id=(?P<old_id>\d+))\/?(?!\S*>)",
     re.IGNORECASE,
 )
 spoiler_re = re.compile(r"(?<!\\)\|\|")

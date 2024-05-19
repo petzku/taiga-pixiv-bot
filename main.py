@@ -16,7 +16,7 @@ import pixiv_auth
 import config
 
 pixiv_re = re.compile(
-    r"(?<!<)https?:\/\/(?:www\.)?pixiv\.net\/(?:.*artworks\/(?P<new_id>\d+)|member_illust\.php\?.*illust_id=(?P<old_id>\d+))\/?(?!\S*>)",
+    r"(?<!<)https?://(?:www\.)?pixiv\.net/(?:.*artworks/(?P<new_id>\d+)|member_illust\.php\?.*illust_id=(?P<old_id>\d+))(?:[^\s>]*#(?P<img_n>\d+))?(?!\S*>)",
     re.IGNORECASE,
 )
 spoiler_re = re.compile(r"(?<!\\)\|\|")
@@ -64,6 +64,8 @@ def is_spoilered(content: str, linkstart: int, linkend: int):
 async def send_embeds(message: discord.Message):
     for match in pixiv_re.finditer(message.content):
         pid = match.group("new_id") or match.group("old_id")
+        img_n = match.group("img_n")
+        nth_image_message = ""
         details = api_auth_wrapper(api.illust_detail, int(pid)).illust
         if details.meta_single_page:
             urls = [
@@ -77,6 +79,9 @@ async def send_embeds(message: discord.Message):
                 select_reasonable_url(page.image_urls.original, page.image_urls.large)
                 for page in pages
             ]
+            if img_n and 0 <= (n := int(img_n) - 1) < len(urls):
+                nth_image_message = f"Image {n+1} of {len(urls)}"
+                urls = urls[n : n + 1]
         else:
             continue
         should_spoiler = is_spoilered(message.content, match.start(), match.end())
@@ -98,7 +103,9 @@ async def send_embeds(message: discord.Message):
                         path.join(config.TEMPDIR, fname), spoiler=should_spoiler
                     )
                 )
-            await message.reply(files=files, mention_author=False)
+            await message.reply(
+                content=nth_image_message, files=files, mention_author=False
+            )
     # remove embeds from invoking message
     try:
         await message.edit(suppress=True)

@@ -44,9 +44,9 @@ def is_over_8mb(url):
 
 
 def select_reasonable_url(original_url, large_url):
-    if is_over_8mb(original_url):
-        # the "large" URL from the API is actually a 600px one, not 1200px
-        return large_url.replace("c/600x1200_90/", "")
+    # if is_over_8mb(original_url):
+    #     # the "large" URL from the API is actually a 600px one, not 1200px
+    #     return large_url.replace("c/600x1200_90/", "")
     return original_url
 
 

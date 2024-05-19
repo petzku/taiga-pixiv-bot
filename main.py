@@ -63,9 +63,9 @@ def is_spoilered(content: str, linkstart: int, linkend: int):
 
 async def send_embeds(message: discord.Message):
     for match in pixiv_re.finditer(message.content):
-        pid = match.group("new_id") or match.group("old_id")
-        img_n = match.group("img_n")
-        nth_image_message = ""
+        pid: str = match.group("new_id") or match.group("old_id")
+        img_n: str | None = match.group("img_n")
+        nth_image_message: str = ""
         details = api_auth_wrapper(api.illust_detail, int(pid)).illust
         if details.meta_single_page:
             urls = [

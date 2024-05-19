@@ -17,5 +17,4 @@ ALLOWLIST: dict[int, list[int]] = {}
 
 # Only reply to spoilered messages on given server/channels
 # e.g. to not conflict with saucybot
-ONLY_SPOILER: Dict[int, bool] = {
-}
+ONLY_SPOILER: dict[int, bool] = {}

@@ -29,6 +29,10 @@ client = discord.Client(intents=intents)
 api = pixivpy3.AppPixivAPI()
 
 
+# cache our sent messages for removal purposes
+responses: dict[int, list[discord.Message]] = {}
+
+
 @client.event
 async def on_ready():
     print("Logged on as", client.user)
@@ -96,6 +100,7 @@ async def send_embeds(message: discord.Message):
         # before downloading, ensure temp directory exists
         if not path.exists(config.TEMPDIR):
             makedirs(config.TEMPDIR)
+        responses[message.id] = []
         for i in range(math.ceil(len(urls) / 10)):
             # limit is 10 attachments per message
             files: List[discord.File] = []
@@ -107,8 +112,10 @@ async def send_embeds(message: discord.Message):
                         path.join(config.TEMPDIR, fname), spoiler=should_spoiler
                     )
                 )
-            await message.reply(
-                content=nth_image_message, files=files, mention_author=False
+            responses[message.id].append(
+                await message.reply(
+                    content=nth_image_message, files=files, mention_author=False
+                )
             )
     # remove embeds from invoking message
     try:
@@ -163,6 +170,14 @@ async def on_message(message: discord.Message):
         and (allow_unspoiler(message) or has_spoiler(message))
     ):
         await send_embeds(message)
+
+
+@client.event
+async def on_message_delete(message: discord.Message):
+    # only check messages we've replied to
+    if message.id in responses.keys():
+        for msg in responses[message.id]:
+            await msg.delete()
 
 
 # auth stuff

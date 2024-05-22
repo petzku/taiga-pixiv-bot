@@ -84,8 +84,10 @@ async def send_embeds(message: discord.Message):
                 for page in pages
             ]
             if has_index:
-                n: int = ((_t := match.group("img_n")) and int(_t) - 1) or (
-                    (_t := match.group("big_n")) and int(_t)
+                n: int = (
+                    int(match.group("img_n")) - 1
+                    if match.group("img_n")
+                    else int(match.group("big_n"))
                 )
                 if 0 <= n < len(urls):
                     nth_image_message = f"Image {n+1} of {len(urls)}"
